@@ -23,17 +23,24 @@
     #end
     ## Web Accessible Bill Manage Preference Data setup
     #if($mngPrefCa && !$mngPrefCa.isEmpty())
-        #set($WebBMngCa = []) ## Initialize the list
+        #set($results = []) ## Initialize the list
         #foreach($item in $mngPrefCa)
             ## Extract ContractAccount
             #set($WebBContractAccount = $item.ContractAccount)
-            #set($WebBMngPrefDtls = [])
+            #set($WebBMngPrefDtlsResults = [])
             #foreach($prefItem in $item.ZGMngPrefDtls)
                 ## Create ZGMessage
                 #set($ZGMessage = {
-                    "Type": "S",
-                    "Id": "11",
-                    "Message": "Preference updated successfully."
+                    "results": [
+                        {
+                            "Type": "S",
+                            "ResultCode": "",
+                            "Id": "11",
+                            "Message": "Preference updated successfully.",
+                            "MessageV1": "",
+                            "MessageV2": ""
+                        }
+                    ]
                 })
                 ## Construct updated prefItem
                 #set($updatedPrefItem = {
@@ -43,18 +50,22 @@
                     "ZGMessage": $ZGMessage
                 })
                 ## Add updated prefItem to WebBMngPrefDtls
-                #set($temp = $WebBMngPrefDtls.add($updatedPrefItem))
+                #set($temp = $WebBMngPrefDtlsResults.add($updatedPrefItem))
             #end
+            ## Construct WebBMngPrefDtls
+            #set($WebBMngPrefDtls = {
+                "results": $WebBMngPrefDtlsResults
+            })
             ## Construct WebBMngCaItem
             #set($WebBMngCaItem = {
                 "ContractAccount": $WebBContractAccount,
                 "ZGMngPrefDtls": $WebBMngPrefDtls
             })
             ## Add to WebBMngCa list
-            #set($temp1 = $WebBMngCa.add($WebBMngCaItem))
+            #set($temp1 = $results.add($WebBMngCaItem))
         #end
         ## Output the final WebBMngCa
-        $WebBMngCa
+        $results
     #end
 #end
 #if($action == "2" && $relatedBusinessPartner == "0001000002")
@@ -66,7 +77,7 @@
         "RequestedTimestamp": "$requestedTimestamp",
         "RelatedBusinessPartner": "$relatedBusinessPartner",
         "ZGMngPrefCa": {
-            "results": $WebBMngCa
+            "results": $results
         },
         "ZGExtension": {
             "results": [
