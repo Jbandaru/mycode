@@ -1,0 +1,6 @@
+#set($data = {
+  "foo": "bar",
+  "number": 123,
+  "list": ["a", "b", "c"]
+})
+$util.toJson($data)
