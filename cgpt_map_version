@@ -1,0 +1,180 @@
+#set($body = $context.requestOverride.path.body)
+#set($reqBody = $util.parseJson($body))
+#if($reqBody && !$reqBody.isEmpty())
+  #set($action = $reqBody.Action)
+  #set($requestedBy = $reqBody.RequestedBy)
+  #set($requestedTimestamp = $reqBody.RequestedTimestamp)
+  #set($relatedBusinessPartner = $reqBody.RelatedBusinessPartner)
+  #set($mngPrefCa = $reqBody.ZGMngPrefCa)
+  #set($num = $nbpId.parseInt($relatedBusinessPartner))
+
+  ## Extract values for "else" condition if needed
+  #set($contractAccount = "")
+  #set($operation = "")
+  #set($prefId = "")
+  #set($subId = "")
+  #set($subVariable = "")
+  #set($channel = "")
+  #set($channelValue = "")
+  #set($addressNumber = "")
+  #set($sequenceNumber = "")
+
+  ## Initialize final results list
+  #set($results = $util.list())
+
+  #if($mngPrefCa && !$mngPrefCa.isEmpty())
+    #foreach($item in $mngPrefCa)
+      #set($WebBContractAccount = $item.ContractAccount)
+
+      #if($foreach.count == 1)
+        #set($contractAccount = $WebBContractAccount)
+      #end
+
+      #set($WebBMngPrefDtlsResults = $util.list())
+      #foreach($prefItem in $item.ZGMngPrefDtls)
+        #if($foreach.count == 1)
+          #set($operation = $prefItem.Operation)
+          #set($prefId = $prefItem.PrefId)
+          #set($subId = $prefItem.SubId)
+          #set($subVariable = $prefItem.SubVariable)
+          #set($channel = $prefItem.Channel)
+          #set($channelValue = $prefItem.ChannelValue)
+          #set($addressNumber = $prefItem.AddressNumber)
+          #set($sequenceNumber = $prefItem.SequenceNumber)
+        #end
+
+        #set($ZGMessage = $util.mapOf(
+          "results", $util.list([
+            $util.mapOf(
+              "Type", "S",
+              "ResultCode", "",
+              "Id", "11",
+              "Message", "Preference updated successfully.",
+              "MessageV1", "",
+              "MessageV2", ""
+            )
+          ])
+        ))
+
+        #set($updatedPrefItem = $util.mapOf(
+          "Operation", $prefItem.Operation,
+          "PrefId", $prefItem.PrefId,
+          "SubId", $prefItem.SubId,
+          "ZGMessage", $ZGMessage
+        ))
+
+        $WebBMngPrefDtlsResults.add($updatedPrefItem)
+      #end
+
+      #set($WebBMngPrefDtls = $util.mapOf("results", $WebBMngPrefDtlsResults))
+      #set($WebBMngCaItem = $util.mapOf(
+        "ContractAccount", $WebBContractAccount,
+        "ZGMngPrefDtls", $WebBMngPrefDtls
+      ))
+      $results.add($WebBMngCaItem)
+    #end
+  #end
+#end
+
+#if($action == "2" && $relatedBusinessPartner == "0001000002")
+  {
+    "d": {
+      "Source": "MYA",
+      "Action": "$action",
+      "RequestedBy": "$requestedBy",
+      "RequestedTimestamp": "$requestedTimestamp",
+      "RelatedBusinessPartner": "$relatedBusinessPartner",
+      "ZGMngPrefCa": {
+        "results": $util.toJson($results)
+      },
+      "ZGExtension": {
+        "results": [
+          {
+            "RefObject": "",
+            "RefFieldName": "",
+            "RefFieldValue": ""
+          }
+        ]
+      },
+      "ZGMessage": {
+        "results": [
+          {
+            "Type": "S",
+            "ResultCode": "",
+            "Id": "10",
+            "Message": "Preferences updated successfully.",
+            "MessageV1": "",
+            "MessageV2": ""
+          }
+        ]
+      }
+    }
+  }
+#else
+  {
+    "d": {
+      "Source": "MYA",
+      "Action": "2",
+      "RequestedBy": "elsecondition@gmail.com",
+      "RequestedTimestamp": "$requestedTimestamp",
+      "RelatedBusinessPartner": "$relatedBusinessPartner",
+      "ZGMngPrefCa": {
+        "results": [
+          {
+            "ContractAccount": "$contractAccount",
+            "ZGMngPrefDtls": {
+              "results": [
+                {
+                  "Operation": "$operation",
+                  "PrefId": "$prefId",
+                  "RefId": "$contractAccount",
+                  "RefType": "ACCOUNT",
+                  "SubId": "$subId",
+                  "SubVariable": "$subVariable",
+                  "Channel": "$channel",
+                  "ChannelValue": "$channelValue",
+                  "AddressNumber": "$addressNumber",
+                  "SequenceNumber": "$sequenceNumber",
+                  "OptOut": false,
+                  "ZGMessage": {
+                    "results": [
+                      {
+                        "Type": "S",
+                        "ResultCode": "",
+                        "Id": "12",
+                        "Message": "Preference updated successfully.",
+                        "MessageV1": "",
+                        "MessageV2": ""
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "ZGExtension": {
+        "results": [
+          {
+            "RefObject": "",
+            "RefFieldName": "",
+            "RefFieldValue": ""
+          }
+        ]
+      },
+      "ZGMessage": {
+        "results": [
+          {
+            "Type": "S",
+            "ResultCode": "",
+            "Id": "10",
+            "Message": "Preferences updated successfully.",
+            "MessageV1": "",
+            "MessageV2": ""
+          }
+        ]
+      }
+    }
+  }
+#end
