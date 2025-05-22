@@ -1,0 +1,30 @@
+#if($mngPrefCa && !$mngPrefCa.isEmpty())
+  #set($WebBMngCa = [])
+  #foreach($item in $mngPrefCa)
+    #set($WebBMngPrefDtls = [])
+    #foreach($prefItem in $item.ZGMngPrefDtls)
+      #set($ZGMessage = $util.map())
+      $ZGMessage.put("Type", "S")
+      $ZGMessage.put("Id", "11")
+      $ZGMessage.put("Message", "Preference updated successfully.")
+
+      #set($updatedPrefItem = $util.map())
+      $updatedPrefItem.put("Operation", $prefItem.Operation)
+      $updatedPrefItem.put("PrefId", $prefItem.PrefId)
+      $updatedPrefItem.put("SubId", $prefItem.SubId)
+      $updatedPrefItem.put("ZGMessage", $ZGMessage)
+
+      $WebBMngPrefDtls.add($updatedPrefItem)
+    #end
+
+    #set($WebBMngCaItem = $util.map())
+    $WebBMngCaItem.put("ContractAccount", $item.ContractAccount)
+    $WebBMngCaItem.put("ZGMngPrefDtls", $WebBMngPrefDtls)
+
+    $WebBMngCa.add($WebBMngCaItem)
+  #end
+
+  $util.toJson($WebBMngCa)
+#else
+  []
+#end
