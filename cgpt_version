@@ -1,0 +1,155 @@
+#set($body = $context.requestOverride.path.body)
+#set($reqBody = $util.parseJson($body))
+
+#if($reqBody && !$reqBody.isEmpty())
+  #set($action = "$reqBody.Action")
+  #set($requestedBy = "$reqBody.RequestedBy")
+  #set($requestedTimestamp = "$reqBody.RequestedTimestamp")
+  #set($relatedBusinessPartner = "$reqBody.RelatedBusinessPartner")
+  #set($mngPrefCa = $reqBody.ZGMngPrefCa)
+  #set($results = [])
+
+  #if($mngPrefCa && !$mngPrefCa.isEmpty())
+    #foreach($item in $mngPrefCa)
+      #set($contractAccount = "$item.ContractAccount")
+      #set($prefDtls = $item.ZGMngPrefDtls)
+      #set($prefResults = [])
+
+      #foreach($pref in $prefDtls)
+        #set($zgMessage = {
+          "results": [{
+            "Type": "S",
+            "ResultCode": "",
+            "Id": "11",
+            "Message": "Preference updated successfully.",
+            "MessageV1": "",
+            "MessageV2": ""
+          }]
+        })
+
+        #set($updatedPrefItem = {
+          "Operation": "$pref.Operation",
+          "PrefId": "$pref.PrefId",
+          "SubId": "$pref.SubId",
+          "ZGMessage": $zgMessage
+        })
+
+        #set($temp = $prefResults.add($updatedPrefItem))
+      #end
+
+      #set($prefDtlsWrapper = {
+        "results": $prefResults
+      })
+
+      #set($caItem = {
+        "ContractAccount": "$contractAccount",
+        "ZGMngPrefDtls": $prefDtlsWrapper
+      })
+
+      #set($temp2 = $results.add($caItem))
+    #end
+  #end
+#end
+
+#if($action == "2" && $relatedBusinessPartner == "0001000002")
+{
+  "d": {
+    "Source": "MYA",
+    "Action": "$action",
+    "RequestedBy": "$requestedBy",
+    "RequestedTimestamp": "$requestedTimestamp",
+    "RelatedBusinessPartner": "$relatedBusinessPartner",
+    "ZGMngPrefCa": {
+      "results": $util.toJson($results)
+    },
+    "ZGExtension": {
+      "results": [
+        {
+          "RefObject": "",
+          "RefFieldName": "",
+          "RefFieldValue": ""
+        }
+      ]
+    },
+    "ZGMessage": {
+      "results": [
+        {
+          "Type": "S",
+          "ResultCode": "",
+          "Id": "10",
+          "Message": "Preferences updated successfully.",
+          "MessageV1": "",
+          "MessageV2": ""
+        }
+      ]
+    }
+  }
+}
+#else
+{
+  "d": {
+    "Source": "MYA",
+    "Action": "2",
+    "RequestedBy": "elsecondition@gmail.com",
+    "RequestedTimestamp": "$requestedTimestamp",
+    "RelatedBusinessPartner": "$relatedBusinessPartner",
+    "ZGMngPrefCa": {
+      "results": [
+        {
+          "ContractAccount": "$contractAccount",
+          "ZGMngPrefDtls": {
+            "results": [
+              {
+                "Operation": "$operation",
+                "PrefId": "$prefId",
+                "RefId": "$contractAccount",
+                "RefType": "ACCOUNT",
+                "SubId": "$subId",
+                "SubVariable": "$subVariable",
+                "Channel": "$channel",
+                "ChannelValue": "$channelValue",
+                "AddressNumber": "$addressNumber",
+                "SequenceNumber": "$sequenceNumber",
+                "OptOut": false,
+                "ZGMessage": {
+                  "results": [
+                    {
+                      "Type": "S",
+                      "ResultCode": "",
+                      "Id": "12",
+                      "Message": "Preference updated successfully.",
+                      "MessageV1": "",
+                      "MessageV2": ""
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "ZGExtension": {
+      "results": [
+        {
+          "RefObject": "",
+          "RefFieldName": "",
+          "RefFieldValue": ""
+        }
+      ]
+    },
+    "ZGMessage": {
+      "results": [
+        {
+          "Type": "S",
+          "ResultCode": "",
+          "Id": "10",
+          "Message": "Preferences updated successfully.",
+          "MessageV1": "",
+          "MessageV2": ""
+        }
+      ]
+    }
+  }
+}
+#end
