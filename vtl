@@ -1,0 +1,35 @@
+    ## Web Accessible Bill Manage Preference Data setup
+    #if($mngPrefCa && !$mngPrefCa.isEmpty())
+        #set($WebBMngCa = []) ## Initialize the list
+        #foreach($item in $mngPrefCa)
+            ## Extract ContractAccount
+            #set($WebBContractAccount = $item.ContractAccount)
+            #set($WebBMngPrefDtls = [])
+            #foreach($prefItem in $item.ZGMngPrefDtls)
+                ## Create ZGMessage
+                #set($ZGMessage = {
+                    "Type": "S",
+                    "Id": "11",
+                    "Message": "Preference updated successfully."
+                })
+                ## Construct updated prefItem
+                #set($updatedPrefItem = {
+                    "Operation": "$prefItem.Operation",
+                    "PrefId": "$prefItem.PrefId",
+                    "SubId": "$prefItem.SubId",
+                    "ZGMessage": $ZGMessage
+                })
+                ## Add updated prefItem to WebBMngPrefDtls
+                #set($temp = $WebBMngPrefDtls.add($updatedPrefItem))
+            #end
+            ## Construct WebBMngCaItem
+            #set($WebBMngCaItem = {
+                "ContractAccount": "$WebBContractAccount",
+                "ZGMngPrefDtls": $WebBMngPrefDtls
+            })
+            ## Add to WebBMngCa list
+            #set($temp1 = $WebBMngCa.add($WebBMngCaItem))
+        #end
+        ## Output the final WebBMngCa
+        $WebBMngCa
+    #end
