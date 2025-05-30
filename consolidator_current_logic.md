@@ -25,4 +25,18 @@ PDF Retrieval:
   Retrieve pdfBillKey - Join BILL_MAIN and BILL_VOLUME tables using accountNumber and newBillId
   If pdfBillKey not found, log audit and terminate
   Retrieve PDF - Use CISDBManager.getInstance().getPDFBill(accountNumber, pdfBillKey) to get PDF byte stream
+    byte[] pdfData = CISDBManager.getInstance().getPDFBill(accountNumber, pdfBillKey);   
   If retrieval fails, log audit and terminate
+
+Return Response:
+  fileName = "MyBill.pdf";
+  HEADER_NAME = "P3P";
+  HEADER_VALUE_CP = "CP=\"NOI DSP COR NID CUR OUR NOR\"";
+  HEADER_VALUE_POLICYREF = "policyref=\"http://www.socalgas.com/residential/scg_eapost_p3p.xml\"";
+  HEADER_VALUES = HEADER_VALUE_CP + "," + HEADER_VALUE_POLICYREF;
+
+  response.setHeader("Content-Disposition","inline; filename=" + fileName );
+  response.addHeader(HEADER_NAME, HEADER_VALUES);
+  response.setContentType("application/pdf; name=" + fileName);
+  OutputStream output = response.getOutputStream();
+  output.write(pdfData);
