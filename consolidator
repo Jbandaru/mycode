@@ -1,0 +1,33 @@
+https://myaccount.socalgas.com/public/faces/viewMyBillFromBank?
+docId=629868070
+&
+billId=2da845e8e80cf26b12e0be3576eb7e35
+&
+rn1=eb82178ae25f9424cf6773798a282e05
+&
+rn2=f168f37536fedc805021a58e9c5ce5a9
+&
+part=1
+
+All params are strings
+docId is not being used
+Part - interfaceID
+
+1. Validate billId,  rn1, rn2 - 32 length
+2. Check if part exists in ebill_interface table with interface_id=part
+3. If part is null or empty
+    1. Check if billId, rn1, rn2 exists in EAPOST_VALIDATEREDIRECTION table with billID, token1, token2
+    2. Get account number from step 1
+    3. Retrieve docId as billId from flex1 in step 1
+4. Else
+    1. Get bill notification details from EBILL_NOTIFICATION table with bill_id, token1, token
+    2. Getaccountnumber from step 1
+    3. Get docid as billId from step 1
+5. Retrieve PDF_BILL_KEY from Bill_main join bill_volume table by accountId and billId
+6. Use pdf_bill_key and account number to get pdfbill form cisdb
+    1. byte[] pdfData = CISDBManager.getInstance().getPDFBill(accountNumber, pdfBillKey)
+    2. output.write(pdfData);
+7. logAuditActivity 
+    1. If length validation fails 
+    2. If part not in ebillinterface
+    3. If pdfbillkey(pdfbillkeystr, account number) object is not retrieved 
