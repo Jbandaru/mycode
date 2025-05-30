@@ -1,0 +1,28 @@
+Input Parameters (from URL):
+  billId: 32-character string
+  rn1: 32-character string
+  rn2: 32-character string
+  part: used to identify interfaceID
+  docId: passed but not directly used in current code
+
+Validations:
+  Length of billId, rn1, and rn2 must be exactly 32 characters
+  If invalid, audit log must be written, and the process should terminate
+
+Interface Check:
+  If part is present:
+    Validate part exists in EBILL_INTERFACE table as interface_id
+  If invalid, log audit and terminate
+
+Data Fetch Logic:
+  If part is missing or empty:
+    Look up the EAPOST_VALIDATEREDIRECTION table with billId, rn1, rn2
+    Retrieve accountNumber and docId as newBillId(from flex1)
+  If part is valid:
+    Use EBILL_NOTIFICATION table with billId, rn1, rn2 to get accountNumber and docId as newBillId
+
+PDF Retrieval:
+  Retrieve pdfBillKey - Join BILL_MAIN and BILL_VOLUME tables using accountNumber and newBillId
+  If pdfBillKey not found, log audit and terminate
+  Retrieve PDF - Use CISDBManager.getInstance().getPDFBill(accountNumber, pdfBillKey) to get PDF byte stream
+  If retrieval fails, log audit and terminate
