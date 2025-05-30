@@ -1,3 +1,5 @@
+**Consolidator Current Logic**
+
 Input Parameters (from URL):
   billId: 32-character string
   rn1: 32-character string
